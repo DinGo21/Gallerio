@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gallerio">
+  <rect width="64" height="64" rx="14" fill="#b5533c"/>
+  <rect x="14" y="17" width="36" height="30" rx="4" fill="#ffffff"/>
+  <circle cx="24" cy="27" r="4" fill="#f4c95d"/>
+  <path d="M15 45l11-13 7 8 6-6 10 11z" fill="#2f3e46"/>
+</svg>

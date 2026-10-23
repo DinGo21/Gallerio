@@ -1,0 +1,330 @@
+/* ==========================================================================
+   Gallerio — custom styles
+   Bootstrap handles layout; these rules add the gallery look and feel.
+   ========================================================================== */
+
+:root {
+    --gallerio-bg: #f6f4f1;
+    --gallerio-surface: #ffffff;
+    --gallerio-text: #22272e;
+    --gallerio-muted: #6b7280;
+    --gallerio-border: #e7e3dd;
+    --gallerio-accent: #b5533c;
+    --gallerio-accent-dark: #93402d;
+    --gallerio-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 8px 24px rgba(16, 24, 40, 0.08);
+    --gallerio-shadow-lg: 0 12px 40px rgba(16, 24, 40, 0.18);
+    --gallerio-radius: 1rem;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--gallerio-bg);
+    color: var(--gallerio-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.navbar-brand {
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Accessibility: skip link and visible focus. */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 2000;
+    padding: 0.5rem 1rem;
+    background: var(--gallerio-accent);
+    color: #fff;
+}
+
+.skip-link:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+    color: #fff;
+}
+
+:focus-visible {
+    outline: 3px solid var(--gallerio-accent);
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Navigation
+   -------------------------------------------------------------------------- */
+
+.gallerio-navbar {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--gallerio-border);
+}
+
+.gallerio-navbar .nav-link {
+    color: var(--gallerio-text);
+}
+
+.gallerio-navbar .nav-link:hover,
+.gallerio-navbar .nav-link:focus-visible {
+    color: var(--gallerio-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+
+.gallerio-hero {
+    padding: 3.5rem 0 2rem;
+}
+
+.gallerio-eyebrow {
+    color: var(--gallerio-accent);
+    letter-spacing: 0.18em;
+}
+
+.gallerio-hero-title {
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+.gallerio-hero-subtitle {
+    max-width: 44rem;
+    color: var(--gallerio-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Search toolbar
+   -------------------------------------------------------------------------- */
+
+.gallerio-toolbar {
+    padding-bottom: 1.5rem;
+}
+
+.gallerio-search {
+    padding: 1rem;
+    background: var(--gallerio-surface);
+    border: 1px solid var(--gallerio-border);
+    border-radius: var(--gallerio-radius);
+    box-shadow: var(--gallerio-shadow);
+}
+
+.gallerio-btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--gallerio-accent);
+    --bs-btn-border-color: var(--gallerio-accent);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--gallerio-accent-dark);
+    --bs-btn-hover-border-color: var(--gallerio-accent-dark);
+    --bs-btn-active-bg: var(--gallerio-accent-dark);
+    --bs-btn-active-border-color: var(--gallerio-accent-dark);
+    --bs-btn-focus-shadow-rgb: 181, 83, 60;
+}
+
+/* --------------------------------------------------------------------------
+   Gallery cards
+   -------------------------------------------------------------------------- */
+
+.gallerio-results {
+    padding-bottom: 3rem;
+}
+
+.gallery-card {
+    color: var(--gallerio-text);
+    background: var(--gallerio-surface);
+    border: 1px solid var(--gallerio-border);
+    border-radius: var(--gallerio-radius);
+    box-shadow: var(--gallerio-shadow);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.gallery-card:hover,
+.gallery-card:focus-visible {
+    transform: translateY(-4px);
+    border-color: transparent;
+    box-shadow: var(--gallerio-shadow-lg);
+    color: var(--gallerio-text);
+}
+
+.gallery-thumb {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #eceae6;
+}
+
+.gallery-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.gallery-card:hover .gallery-thumb-img,
+.gallery-card:focus-visible .gallery-thumb-img {
+    transform: scale(1.05);
+}
+
+.gallery-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.9rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 55%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.gallery-card:hover .gallery-thumb-overlay,
+.gallery-card:focus-visible .gallery-thumb-overlay {
+    opacity: 1;
+}
+
+.gallery-badge {
+    font-weight: 600;
+}
+
+.gallery-zoom {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--gallerio-accent);
+}
+
+.gallery-card-body {
+    padding: 1rem 1.1rem 1.15rem;
+}
+
+.gallery-card-title {
+    margin-bottom: 0.35rem;
+    font-size: 1.05rem;
+}
+
+.gallery-card-text {
+    margin: 0;
+    color: var(--gallerio-muted);
+    font-size: 0.875rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Empty state
+   -------------------------------------------------------------------------- */
+
+.gallerio-empty {
+    border-radius: var(--gallerio-radius);
+}
+
+/* --------------------------------------------------------------------------
+   Lightbox
+   -------------------------------------------------------------------------- */
+
+.gallerio-lightbox {
+    color: #fff;
+    background: #111318;
+    border: 0;
+    overflow: hidden;
+}
+
+.gallerio-lightbox-header,
+.gallerio-lightbox-footer {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.gallerio-lightbox-body {
+    position: relative;
+    padding: 0;
+    background: #000;
+}
+
+.gallerio-lightbox-img {
+    display: block;
+    width: 100%;
+    max-height: 72vh;
+    object-fit: contain;
+}
+
+.gallerio-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 1.75rem;
+    line-height: 1;
+    transition: background 0.2s ease;
+}
+
+.gallerio-lightbox-nav:hover,
+.gallerio-lightbox-nav:focus-visible {
+    background: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.gallerio-lightbox-prev {
+    left: 0.75rem;
+}
+
+.gallerio-lightbox-next {
+    right: 0.75rem;
+}
+
+.gallerio-lightbox-description {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.gallerio-lightbox-tags .badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
+.gallerio-footer {
+    border-top: 1px solid var(--gallerio-border);
+    background: var(--gallerio-surface);
+}
+
+/* --------------------------------------------------------------------------
+   Motion preferences
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
