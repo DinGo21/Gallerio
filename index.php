@@ -18,11 +18,21 @@ require_once __DIR__ . '/src/init.php';
 $query = trim((string) ($_GET['q'] ?? ''));
 $category = trim((string) ($_GET['category'] ?? ''));
 $hasFilters = ($query !== '' || $category !== '');
+$uploaded = (($_GET['uploaded'] ?? '') === '1');
 
-$repository = new ImageRepository();
-$images = $repository->all();
-$filtered = $repository->filter($images, $query, $category);
-$categories = $repository->categories($images);
+$databaseError = null;
+$images = [];
+$filtered = [];
+$categories = [];
+
+try {
+    $repository = new ImageRepository();
+    $images = $repository->all();
+    $filtered = $repository->filter($images, $query, $category);
+    $categories = $repository->categories($images);
+} catch (PDOException $exception) {
+    $databaseError = 'The image database is unavailable. Start MariaDB and try again.';
+}
 
 $count = count($filtered);
 $summary = $hasFilters
@@ -80,27 +90,44 @@ require __DIR__ . '/src/views/header.php';
     </form>
 </section>
 
-<section class="container gallerio-results" id="gallery" aria-label="Gallery results">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <h2 class="h5 mb-0">Gallery</h2>
-        <p class="mb-0 text-muted small" id="results-summary"><?= e($summary) ?></p>
-    </div>
-
-    <?php if ($count === 0): ?>
-        <div class="alert alert-light border text-center gallerio-empty" role="status">
-            <p class="mb-2">No images match your search.</p>
-            <a href="index.php" class="btn btn-outline-secondary btn-sm">View all images</a>
+<?php if ($databaseError !== null): ?>
+    <section class="container gallerio-results">
+        <div class="alert alert-danger" role="alert">
+            <?= e($databaseError) ?>
         </div>
-    <?php else: ?>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-            <?php foreach ($filtered as $image): ?>
-                <div class="col">
-                    <?php require __DIR__ . '/src/views/gallery-card.php'; ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
+    </section>
+<?php else: ?>
+    <?php if ($uploaded): ?>
+        <section class="container">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                Your image was uploaded successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </section>
     <?php endif; ?>
-</section>
+
+    <section class="container gallerio-results" id="gallery" aria-label="Gallery results">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h2 class="h5 mb-0">Gallery</h2>
+            <p class="mb-0 text-muted small" id="results-summary"><?= e($summary) ?></p>
+        </div>
+
+        <?php if ($count === 0): ?>
+            <div class="alert alert-light border text-center gallerio-empty" role="status">
+                <p class="mb-2">No images match your search.</p>
+                <a href="index.php" class="btn btn-outline-secondary btn-sm">View all images</a>
+            </div>
+        <?php else: ?>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                <?php foreach ($filtered as $image): ?>
+                    <div class="col">
+                        <?php require __DIR__ . '/src/views/gallery-card.php'; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 
 <?php
 require __DIR__ . '/src/views/lightbox.php';

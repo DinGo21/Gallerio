@@ -32,7 +32,10 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav ms-auto align-items-md-center">
                         <li class="nav-item">
-                            <a class="nav-link" href="#gallery">Gallery</a>
+                            <a class="nav-link" href="index.php#gallery">Gallery</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="upload.php">Upload</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#about">About</a>

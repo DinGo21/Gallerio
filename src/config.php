@@ -25,3 +25,14 @@ define('GALLERIO_IMAGE_DIR', GALLERIO_ROOT . '/images');
 
 // File extensions that are treated as gallery images.
 define('GALLERIO_IMAGE_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+
+// Database connection (development credentials).
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', 3306);
+define('DB_NAME', 'gallerio');
+define('DB_USER', 'gallerio');
+define('DB_PASS', 'gallerio');
+
+// Uploaded files must be JPG/JPEG and no larger than this.
+define('GALLERIO_UPLOAD_EXTENSIONS', ['jpg', 'jpeg']);
+define('GALLERIO_MAX_UPLOAD_BYTES', 10 * 1024 * 1024);

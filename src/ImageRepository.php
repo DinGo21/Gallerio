@@ -3,56 +3,51 @@
 declare(strict_types=1);
 
 /*
- * Loads the curated images from disk and merges them with the metadata
- * defined in src/data/images.php.
+ * Reads gallery images from the MariaDB `images` table.
  *
- * Keeping the loading logic in a single class makes it easy to swap the data
- * source later (for example, a database) without touching the views.
+ * The database is the source of truth for the gallery. The curated metadata in
+ * src/data/images.php is only used by database/seed.php to populate the table.
  */
 
 /**
  * A single gallery image.
  *
  * array{
+ *     id: int,
  *     file: string,
  *     title: string,
  *     description: string,
  *     category: string,
  *     tags: list<string>,
+ *     created_at: string,
  *     searchable: string
  * }
  */
 final class ImageRepository
 {
-    /** @var string */
-    private string $directory;
+    private PDO $pdo;
 
-    /** @var list<string> */
-    private array $extensions;
-
-    /** @var array<string, array{title: string, description: string, category: string, tags: list<string>}> */
-    private array $metadata;
-
-    /**
-     * @param list<string>|null $extensions
-     */
-    public function __construct(?string $directory = null, ?array $extensions = null)
+    public function __construct(?PDO $pdo = null)
     {
-        $this->directory = $directory ?? GALLERIO_IMAGE_DIR;
-        $this->extensions = $extensions ?? GALLERIO_IMAGE_EXTENSIONS;
-        $this->metadata = gallerio_image_data();
+        $this->pdo = $pdo ?? Database::connection();
     }
 
     /**
-     * Return every gallery image, ordered by file name for stable output.
+     * Return every gallery image, newest first.
      *
      * @return list<array<string, mixed>>
      */
     public function all(): array
     {
+        $statement = $this->pdo->query(
+            'SELECT id, filename, title, description, category, tags, created_at
+             FROM images
+             ORDER BY created_at DESC, id DESC'
+        );
+
         $images = [];
-        foreach ($this->filenames() as $file) {
-            $images[] = $this->buildRecord($file);
+        foreach ($statement->fetchAll() as $row) {
+            $images[] = $this->buildRecord($row);
         }
 
         return $images;
@@ -112,90 +107,54 @@ final class ImageRepository
     }
 
     /**
-     * Scan the image directory and return the supported file names.
+     * Insert a new image record.
      *
-     * @return list<string>
+     * @param array{filename: string, title: string, description: string, category: string, tags: list<string>} $data
      */
-    private function filenames(): array
+    public function create(array $data): int
     {
-        if (!is_dir($this->directory)) {
-            return [];
-        }
+        $statement = $this->pdo->prepare(
+            'INSERT INTO images (filename, title, description, category, tags)
+             VALUES (:filename, :title, :description, :category, :tags)'
+        );
 
-        $extensions = array_map('strtolower', $this->extensions);
-        $files = [];
+        $statement->execute([
+            ':filename' => $data['filename'],
+            ':title' => $data['title'],
+            ':description' => $data['description'],
+            ':category' => $data['category'],
+            ':tags' => implode(', ', $data['tags']),
+        ]);
 
-        foreach (scandir($this->directory) ?: [] as $entry) {
-            if ($entry === '.' || $entry === '..') {
-                continue;
-            }
-
-            if (!is_file($this->directory . '/' . $entry)) {
-                continue;
-            }
-
-            $extension = strtolower(pathinfo($entry, PATHINFO_EXTENSION));
-            if (!in_array($extension, $extensions, true)) {
-                continue;
-            }
-
-            $files[] = $entry;
-        }
-
-        sort($files, SORT_STRING);
-
-        return $files;
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
-     * Build a normalized record for one image file.
+     * Build a normalized record from a database row.
      *
+     * @param array<string, mixed> $row
      * @return array<string, mixed>
      */
-    private function buildRecord(string $file): array
+    private function buildRecord(array $row): array
     {
-        $meta = $this->metadata[$file] ?? [];
-
-        $title = trim((string) ($meta['title'] ?? ''));
-        if ($title === '') {
-            $title = $this->titleFromFilename($file);
-        }
-
-        $description = trim((string) ($meta['description'] ?? ''));
-
-        $category = trim((string) ($meta['category'] ?? ''));
-        if ($category === '') {
-            $category = 'Uncategorised';
-        }
-
-        $tags = array_values(array_filter(array_map('trim', (array) ($meta['tags'] ?? []))));
+        $file = (string) $row['filename'];
+        $title = (string) $row['title'];
+        $description = (string) $row['description'];
+        $category = (string) $row['category'];
+        $tags = array_values(array_filter(array_map('trim', explode(',', (string) $row['tags']))));
 
         return [
+            'id' => (int) $row['id'],
             'file' => $file,
             'title' => $title,
             'description' => $description,
             'category' => $category,
             'tags' => $tags,
+            'created_at' => (string) $row['created_at'],
             'searchable' => $this->normalize(
                 implode(' ', array_merge([$title, $description, $category, $file], $tags))
             ),
         ];
-    }
-
-    /**
-     * Derive a readable title from a file name, e.g.
-     * "wolfgang_hasselmann-desert-10463843_1920" becomes "Wolfgang Hasselmann Desert".
-     */
-    private function titleFromFilename(string $file): string
-    {
-        $name = pathinfo($file, PATHINFO_FILENAME);
-
-        // Drop trailing size/ID groups such as "-10124031_1920".
-        $name = preg_replace('/([_-]\d+)+$/', '', $name) ?? $name;
-        $name = str_replace(['-', '_'], ' ', $name);
-        $name = preg_replace('/\s+/', ' ', $name) ?? $name;
-
-        return ucwords(trim($name));
     }
 
     /**
