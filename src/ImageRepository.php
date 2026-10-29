@@ -23,13 +23,24 @@ declare(strict_types=1);
  *     searchable: string
  * }
  */
-final class ImageRepository
+class ImageRepository
 {
-    private PDO $pdo;
+    private ?PDO $pdo;
 
     public function __construct(?PDO $pdo = null)
     {
-        $this->pdo = $pdo ?? Database::connection();
+        $this->pdo = $pdo;
+    }
+
+    /**
+     * Return the PDO connection, creating it on first use.
+     *
+     * Filtering and category helpers do not need a database, which keeps them
+     * easy to unit test.
+     */
+    private function connection(): PDO
+    {
+        return $this->pdo ??= Database::connection();
     }
 
     /**
@@ -39,7 +50,7 @@ final class ImageRepository
      */
     public function all(): array
     {
-        $statement = $this->pdo->query(
+        $statement = $this->connection()->query(
             'SELECT id, filename, title, description, category, tags, created_at
              FROM images
              ORDER BY created_at DESC, id DESC'
@@ -113,7 +124,9 @@ final class ImageRepository
      */
     public function create(array $data): int
     {
-        $statement = $this->pdo->prepare(
+        $pdo = $this->connection();
+
+        $statement = $pdo->prepare(
             'INSERT INTO images (filename, title, description, category, tags)
              VALUES (:filename, :title, :description, :category, :tags)'
         );
@@ -126,7 +139,7 @@ final class ImageRepository
             ':tags' => implode(', ', $data['tags']),
         ]);
 
-        return (int) $this->pdo->lastInsertId();
+        return (int) $pdo->lastInsertId();
     }
 
     /**

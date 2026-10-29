@@ -1,7 +1,9 @@
 # AGENTS.md
 
-Gallerio is a single-page image gallery: **vanilla PHP** (no framework, no Composer)
-plus **Bootstrap 5**, backed by **MariaDB**. There is no build step and no test suite.
+Gallerio is a single-page image gallery: **vanilla PHP** (no framework) plus
+**Bootstrap 5**, backed by **MariaDB**. There is no build step. Composer is used
+**only for dev tooling** (PHPUnit); the deployed app has no runtime Composer
+dependencies.
 
 ## Run and verify
 
@@ -46,6 +48,28 @@ table is the source of truth. Re-run `php database/seed.php` after editing it.
   name, then a row is inserted via `ImageRepository::create()`.
 - `images/` must stay writable by the PHP process.
 
+## Testing
+
+PHPUnit is a **dev-only** dependency. Integration tests use a separate
+`gallerio_test` database and skip automatically when it is unreachable.
+
+```bash
+sudo systemctl start mariadb
+sudo mariadb < database/schema.test.sql   # once; creates gallerio_test
+composer install
+composer test                             # all suites
+composer test:unit                        # no database required
+composer test:integration                 # needs gallerio_test
+vendor/bin/phpunit --filter=Upload        # focused run
+```
+
+- `tests/Unit/` — helpers, search/filter logic, view escaping, upload validation.
+- `tests/Integration/` — real MariaDB CRUD via `gallerio_test`.
+- `ImageUploader` accepts injectable file-operation callables so tests avoid real
+  HTTP uploads. `ImageRepository` connects lazily, so filter/category unit tests
+  need no database.
+- `vendor/`, `.phpunit.cache/` and `tests/tmp/` are gitignored.
+
 ## Adding a curated image
 
 1. Drop the file into `images/`.
@@ -68,3 +92,4 @@ table is the source of truth. Re-run `php database/seed.php` after editing it.
 
 - Only Bootstrap may be used for styling/layout; no other external libraries.
 - No PHP frameworks, no extra features beyond the initial requirements unless asked.
+- PHPUnit/Composer are dev-only test tooling and are not part of the deployed app.

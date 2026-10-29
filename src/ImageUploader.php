@@ -14,10 +14,26 @@ final class ImageUploader
 
     private string $directory;
 
-    public function __construct(ImageRepository $repository, ?string $directory = null)
-    {
+    /** @var callable(string): bool */
+    private $isUploadedFile;
+
+    /** @var callable(string, string): bool */
+    private $moveUploadedFile;
+
+    /**
+     * The file-operation callables are injectable so tests can avoid relying on
+     * real HTTP uploads; production keeps the native functions.
+     */
+    public function __construct(
+        ImageRepository $repository,
+        ?string $directory = null,
+        ?callable $isUploadedFile = null,
+        ?callable $moveUploadedFile = null
+    ) {
         $this->repository = $repository;
         $this->directory = $directory ?? GALLERIO_IMAGE_DIR;
+        $this->isUploadedFile = $isUploadedFile ?? 'is_uploaded_file';
+        $this->moveUploadedFile = $moveUploadedFile ?? 'move_uploaded_file';
     }
 
     /**
@@ -51,7 +67,7 @@ final class ImageUploader
         $filename = $this->uniqueFilename($title);
         $destination = $this->directory . '/' . $filename;
 
-        if (!move_uploaded_file((string) $file['tmp_name'], $destination)) {
+        if (!($this->moveUploadedFile)((string) $file['tmp_name'], $destination)) {
             return [
                 'success' => false,
                 'errors' => ['The image could not be saved. Check that the images directory is writable.'],
@@ -142,7 +158,7 @@ final class ImageUploader
         }
 
         $tmp = (string) ($file['tmp_name'] ?? '');
-        if (!is_uploaded_file($tmp)) {
+        if (!($this->isUploadedFile)($tmp)) {
             return 'The upload failed. Please try again.';
         }
 
