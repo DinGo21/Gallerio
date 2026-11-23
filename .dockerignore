@@ -1,0 +1,10 @@
+.git
+.env
+vendor
+tests
+.phpunit.cache
+composer.json
+composer.lock
+phpunit.xml.dist
+database/schema.test.sql
+AGENTS.md

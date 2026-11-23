@@ -26,12 +26,13 @@ define('GALLERIO_IMAGE_DIR', GALLERIO_ROOT . '/images');
 // File extensions that are treated as gallery images.
 define('GALLERIO_IMAGE_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
-// Database connection (development credentials).
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', 3306);
-define('DB_NAME', 'gallerio');
-define('DB_USER', 'gallerio');
-define('DB_PASS', 'gallerio');
+// Database connection. The defaults are the development credentials; the
+// Docker deployment overrides them through the environment (see .env.example).
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', (int) (getenv('DB_PORT') ?: 3306));
+define('DB_NAME', getenv('DB_NAME') ?: 'gallerio');
+define('DB_USER', getenv('DB_USER') ?: 'gallerio');
+define('DB_PASS', getenv('DB_PASS') ?: 'gallerio');
 
 // Uploaded files must be JPG/JPEG and no larger than this.
 define('GALLERIO_UPLOAD_EXTENSIONS', ['jpg', 'jpeg']);

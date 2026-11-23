@@ -14,6 +14,30 @@ php -d upload_max_filesize=10M -d post_max_size=12M -S localhost:8000
 
 Open http://localhost:8000. PHP must be served over HTTP.
 
+## Docker deployment
+
+The app and MariaDB run as two Compose services; Apache serves on
+http://127.0.0.1:8080. Docker files: `Dockerfile`, `docker-compose.yml`,
+`docker/php.ini`, `docker/apache.conf`.
+
+```bash
+cp .env.example .env             # DB_ROOT_PASSWORD is the only required change
+chmod 777 images                 # Apache (www-data, uid 33) must write uploads
+docker compose up -d --build
+docker compose exec app php database/seed.php
+```
+
+- `images/` is a bind mount; curated photos and uploads persist on the host.
+- DB data lives in the `gallerio_gallerio_db` named volume. `docker compose down`
+  keeps it; `docker compose down -v` deletes it.
+- `src/config.php` reads `DB_*` from the environment, falling back to the local
+  development defaults. Compose sets `DB_HOST=db`.
+- `database/schema.sql` is mounted into `/docker-entrypoint-initdb.d/` and runs
+  only on first initialisation.
+- `docker/apache.conf` denies `src/`, `database/`, `tests/`, `vendor/` and the
+  dev metadata files; they must never be publicly reachable.
+- `.dockerignore` keeps `vendor/`, `tests/` and Composer files out of the image.
+
 ## Database setup
 
 MariaDB 11.8; database, user and password are all `gallerio` (dev-only credentials
