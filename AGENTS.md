@@ -23,11 +23,13 @@ http://127.0.0.1:8080. Docker files: `Dockerfile`, `docker-compose.yml`,
 ```bash
 cp .env.example .env             # DB_ROOT_PASSWORD is the only required change
 docker compose up -d --build
-docker compose exec app php database/seed.php
 ```
 
 - `docker/entrypoint.sh` makes `images/` writable at startup, so a fresh clone
   needs no manual `chmod` (Docker would otherwise create it as `root:root 0755`).
+- The same entrypoint runs `database/seed.php` on every start. It is idempotent
+  (upsert by file name) and retries while MariaDB starts; set
+  `GALLERIO_SKIP_SEED=1` on the `app` service to disable it.
 - `images/` is a bind mount; curated photos and uploads persist on the host.
   The curated photos are tracked in git, while new uploads stay untracked
   because `.gitignore` ignores `images/`.
