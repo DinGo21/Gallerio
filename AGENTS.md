@@ -61,14 +61,17 @@ table is the source of truth. Re-run `php database/seed.php` after editing it.
 
 ## Data flow
 
-`index.php` / `upload.php` → `src/init.php` → `ImageRepository` → MariaDB →
-`src/views/*` partials.
+`index.php` / `upload.php` / `delete.php` → `src/init.php` → `ImageRepository` →
+MariaDB → `src/views/*` partials.
 
 - Search is **server-side** via `GET /index.php?q=…&category=…`; `assets/js/gallery.js`
   only drives the lightbox. Don't add client-side filtering.
 - `ImageRepository::all()` reads `images` newest-first; `filter()` matches the
   normalized `searchable` string (title + description + category + tags + file name).
 - Use `Database::connection()` for new PDO access; it returns a shared connection.
+- **Deletion is upload-only.** `delete.php` accepts `POST id=…`, removes the row and
+  unlinks the file. Curated files (keys in `src/data/images.php`) are protected
+  because `database/seed.php` restores them on every start.
 
 ## Uploads
 

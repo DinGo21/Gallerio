@@ -19,6 +19,14 @@ $query = trim((string) ($_GET['q'] ?? ''));
 $category = trim((string) ($_GET['category'] ?? ''));
 $hasFilters = ($query !== '' || $category !== '');
 $uploaded = (($_GET['uploaded'] ?? '') === '1');
+$deleted = (($_GET['deleted'] ?? '') === '1');
+$deleteError = match ((string) ($_GET['delete_error'] ?? '')) {
+    'invalid' => 'That delete request was not valid.',
+    'missing' => 'That image no longer exists.',
+    'curated' => 'Curated images cannot be deleted.',
+    'database' => 'The image could not be deleted because the database is unavailable.',
+    default => null,
+};
 
 $databaseError = null;
 $images = [];
@@ -101,6 +109,24 @@ require __DIR__ . '/src/views/header.php';
         <section class="container">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 Your image was uploaded successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($deleted): ?>
+        <section class="container">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                The image was deleted.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($deleteError !== null): ?>
+        <section class="container">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?= e($deleteError) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </section>

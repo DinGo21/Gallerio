@@ -98,9 +98,29 @@ final class ImageRepositoryDatabaseTest extends TestCase
         self::assertSame(['Animals', 'Nature'], $this->repository->categories());
     }
 
-    public function testFilterWorksWithStoredRecords(): void
+    public function testFindReturnsRecord(): void
     {
-        $this->repository->create($this->record([
+        $id = $this->repository->create($this->record(['filename' => 'find-me.jpg']));
+
+        $image = $this->repository->find($id);
+
+        self::assertNotNull($image);
+        self::assertSame($id, $image['id']);
+        self::assertSame('find-me.jpg', $image['file']);
+        self::assertNull($this->repository->find($id + 999));
+    }
+
+    public function testDeleteRemovesRecord(): void
+    {
+        $id = $this->repository->create($this->record(['filename' => 'delete-me.jpg']));
+
+        self::assertTrue($this->repository->delete($id));
+        self::assertNull($this->repository->find($id));
+        self::assertFalse($this->repository->delete($id));
+    }
+
+    public function testFilterWorksWithStoredRecords(): void
+    {        $this->repository->create($this->record([
             'filename' => 'forest.jpg',
             'title' => 'Forest',
             'description' => 'Trees and a lake.',

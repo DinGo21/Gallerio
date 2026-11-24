@@ -14,7 +14,7 @@
     <title><?= e(($pageTitle ?? GALLERIO_NAME) === GALLERIO_NAME ? GALLERIO_NAME : $pageTitle . ' · ' . GALLERIO_NAME) ?></title>
     <link rel="icon" type="image/svg+xml" href="<?= e(asset('img/favicon.svg')) ?>">
     <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/css/bootstrap.min.css')) ?>">
-    <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset_versioned('css/style.css')) ?>">
 </head>
 <body class="d-flex flex-column min-vh-100">
     <a class="skip-link" href="#gallery">Skip to gallery</a>

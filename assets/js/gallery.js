@@ -9,6 +9,16 @@
 (function () {
     'use strict';
 
+    // Ask before submitting destructive forms (currently the delete action).
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            var message = form.getAttribute('data-confirm') || 'Are you sure?';
+            if (!window.confirm(message)) {
+                event.preventDefault();
+            }
+        });
+    });
+
     var cards = Array.prototype.slice.call(document.querySelectorAll('[data-image]'));
     if (cards.length === 0) {
         return;

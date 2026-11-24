@@ -26,6 +26,14 @@ final class HelpersTest extends TestCase
         self::assertSame('assets/css/style.css', asset('/css/style.css'));
     }
 
+    public function testVersionsAssetUrlWithModificationTime(): void
+    {
+        self::assertMatchesRegularExpression(
+            '#^assets/css/style\.css\?v=\d+$#',
+            asset_versioned('css/style.css')
+        );
+    }
+
     public function testBuildsEncodedImageUrl(): void
     {
         self::assertSame('images/my%20photo.jpg', image_url('my photo.jpg'));
@@ -34,5 +42,11 @@ final class HelpersTest extends TestCase
     public function testBuildsImagePath(): void
     {
         self::assertSame(GALLERIO_IMAGE_DIR . '/photo.jpg', image_path('photo.jpg'));
+    }
+
+    public function testDetectsCuratedImages(): void
+    {
+        self::assertTrue(is_curated_image('wolfgang_hasselmann-desert-10463843_1920.jpg'));
+        self::assertFalse(is_curated_image('my-upload-abc123.jpg'));
     }
 }

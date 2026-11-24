@@ -65,6 +65,38 @@ class ImageRepository
     }
 
     /**
+     * Find a single image by id.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function find(int $id): ?array
+    {
+        $statement = $this->connection()->prepare(
+            'SELECT id, filename, title, description, category, tags, created_at
+             FROM images
+             WHERE id = :id'
+        );
+
+        $statement->execute([':id' => $id]);
+        $row = $statement->fetch();
+
+        return $row === false ? null : $this->buildRecord($row);
+    }
+
+    /**
+     * Delete an image row by id.
+     *
+     * @return bool True when a row was removed.
+     */
+    public function delete(int $id): bool
+    {
+        $statement = $this->connection()->prepare('DELETE FROM images WHERE id = :id');
+        $statement->execute([':id' => $id]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    /**
      * Distinct categories, sorted alphabetically.
      *
      * @param list<array<string, mixed>>|null $images

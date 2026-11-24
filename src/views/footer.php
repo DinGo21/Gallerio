@@ -12,6 +12,6 @@
     </footer>
 
     <script src="<?= e(asset('vendor/bootstrap/js/bootstrap.bundle.min.js')) ?>"></script>
-    <script src="<?= e(asset('js/gallery.js')) ?>"></script>
+    <script src="<?= e(asset_versioned('js/gallery.js')) ?>"></script>
 </body>
 </html>
