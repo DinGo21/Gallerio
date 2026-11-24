@@ -1,3 +1,4 @@
+# Uploads stay untracked; curated photos are force-added with `git add -f`.
 images/
 .env
 

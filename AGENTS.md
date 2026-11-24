@@ -22,12 +22,15 @@ http://127.0.0.1:8080. Docker files: `Dockerfile`, `docker-compose.yml`,
 
 ```bash
 cp .env.example .env             # DB_ROOT_PASSWORD is the only required change
-chmod 777 images                 # Apache (www-data, uid 33) must write uploads
 docker compose up -d --build
 docker compose exec app php database/seed.php
 ```
 
+- `docker/entrypoint.sh` makes `images/` writable at startup, so a fresh clone
+  needs no manual `chmod` (Docker would otherwise create it as `root:root 0755`).
 - `images/` is a bind mount; curated photos and uploads persist on the host.
+  The curated photos are tracked in git, while new uploads stay untracked
+  because `.gitignore` ignores `images/`.
 - DB data lives in the `gallerio_gallerio_db` named volume. `docker compose down`
   keeps it; `docker compose down -v` deletes it.
 - `src/config.php` reads `DB_*` from the environment, falling back to the local
@@ -98,7 +101,9 @@ vendor/bin/phpunit --filter=Upload        # focused run
 
 1. Drop the file into `images/`.
 2. Add a metadata entry in `src/data/images.php`, keyed by the **exact file name**.
-3. Run `php database/seed.php` (or insert the row manually).
+3. Track the file explicitly: `git add -f images/<name>.jpg` (the folder is
+   gitignored so uploads stay untracked).
+4. Run `php database/seed.php` (or insert the row manually).
 
 ## Conventions and quirks
 
